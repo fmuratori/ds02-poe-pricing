@@ -1,6 +1,13 @@
+import os
+import sys
+p = os.path.abspath('../')
+sys.path.append(p)
+
 import requests
 
-DEFAULT_URL = 'https://www.pathofexile.com/api/public-stash-tabs?id='
+import constants
+
+constants.DEFAULT_URL = 'https://www.pathofexile.com/api/public-stash-tabs?id='
 
 def isHealthyStash(stash):
     return stash['stash'] is not None and stash['stashType'] is not None and stash['league'] is not None    
@@ -19,7 +26,7 @@ def searchLeague(leagueName, index, partialNextChangeId, stepSize):
         return partialNextChangeId
 
     while True:
-        data = requests.get(DEFAULT_URL + buildFullNextChangeId(index, partialNextChangeId)).json()
+        data = requests.get(constants.DEFAULT_URL + buildFullNextChangeId(index, partialNextChangeId)).json()
         nextChangeId = data['next_change_id']
 
         for stash in data['stashes']:
