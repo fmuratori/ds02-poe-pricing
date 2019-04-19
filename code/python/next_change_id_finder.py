@@ -6,11 +6,10 @@ sys.path.append(p)
 import requests
 
 import constants
+import utilities as utils
 
-constants.DEFAULT_URL = 'https://www.pathofexile.com/api/public-stash-tabs?id='
-
-def isHealthyStash(stash):
-    return stash['stash'] is not None and stash['stashType'] is not None and stash['league'] is not None    
+def buildFullNextChangeId(index, partialNextChangeId):
+    return '-'.join([str(partialNextChangeId) if i == index else '0' for i in range(5)])
 
 def findOptimalNextChangeId(leagueName):
     results = []
@@ -26,18 +25,14 @@ def searchLeague(leagueName, index, partialNextChangeId, stepSize):
         return partialNextChangeId
 
     while True:
-        data = requests.get(constants.DEFAULT_URL + buildFullNextChangeId(index, partialNextChangeId)).json()
-        nextChangeId = data['next_change_id']
-
-        for stash in data['stashes']:
-            if isHealthyStash(stash) and leagueName in stash['league']:
+        nextChangeId, stashes = utils.getStashBatch(constants.DEFAULT_URL + buildFullNextChangeId(index, partialNextChangeId))
+        for stash in stashes:
+            if utils.isHealthyStash(stash) and leagueName in stash['league']:
                 return searchLeague(leagueName, index, int(partialNextChangeId - stepSize), int(stepSize/10))
             if nextChangeId.split('-')[index] == str(partialNextChangeId):
                 return partialNextChangeId
         partialNextChangeId += stepSize
 
-def buildFullNextChangeId(index, partialNextChangeId):
-    return '-'.join([str(partialNextChangeId) if i == index else '0' for i in range(5)])
 
 if __name__ == "__main__":
     findOptimalNextChangeId('Synthesis')
