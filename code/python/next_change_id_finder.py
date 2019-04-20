@@ -1,7 +1,10 @@
 import os
 import sys
-p = os.path.abspath('../')
-sys.path.append(p)
+sys.path.append(
+    os.path.abspath(
+        os.path.join(
+            os.path.join(os.path.realpath(__file__), os.pardir), os.pardir)))
+
 
 import requests
 
@@ -10,14 +13,6 @@ import utilities as utils
 
 def buildFullNextChangeId(index, partialNextChangeId):
     return '-'.join([str(partialNextChangeId) if i == index else '0' for i in range(5)])
-
-def findOptimalNextChangeId(leagueName):
-    results = []
-    for i in range(5):
-        bestPartialIndex = searchLeague(leagueName, i, 0, 10000000)
-        results.append(bestPartialIndex)
-        print('Best: {} {}'.format(i, bestPartialIndex))
-    print('Best nextChangeId for league {}: {}'. format(leagueName, results))
 
 def searchLeague(leagueName, index, partialNextChangeId, stepSize):
     print('Started recursive search with params: {} {} {} {}'.format(leagueName, index, partialNextChangeId, stepSize))
@@ -33,6 +28,13 @@ def searchLeague(leagueName, index, partialNextChangeId, stepSize):
                 return partialNextChangeId
         partialNextChangeId += stepSize
 
+def findOptimalNextChangeId(leagueName):
+    results = []
+    for i in range(5):
+        bestPartialIndex = searchLeague(leagueName, i, 0, 10000000)
+        results.append(bestPartialIndex)
+        print('Best: {} {}'.format(i, bestPartialIndex))
+    print('Best nextChangeId for league {}: {}'. format(leagueName, results))
 
 if __name__ == "__main__":
     findOptimalNextChangeId('Synthesis')
