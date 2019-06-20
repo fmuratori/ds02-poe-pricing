@@ -8,8 +8,16 @@ CODE_FOLDER = PROJECT_FOLDER + 'code/'
 
 DATA_FOLDER = PROJECT_FOLDER + 'data/'
 RESOURCES_FOLDER = DATA_FOLDER + 'resources/'
+
 LAST_NDI_SAVED_FILE = RESOURCES_FOLDER + 'last_nextChangeId.txt'
-ORIGIN_DATA_FOLDER = DATA_FOLDER + 'origin/'
+
+ORIGIN_DATA_FOLDER = DATA_FOLDER + 'market_origin/'
+
+ORIGIN_TEST_DATA_FOLDER = DATA_FOLDER + 'market_origin_test/'
+
+CURRENCIES_DATA_FOLDER = DATA_FOLDER + 'market_currencies/'
+ITEMS_DATA_FOLDER = DATA_FOLDER + 'market_items/'
+
 
 EXTERNAL_DATA_FOLDER = '/mnt/NILOX/origin/'
 

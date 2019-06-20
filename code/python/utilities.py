@@ -5,22 +5,28 @@ sys.path.append(
         os.path.join(
             os.path.join(os.path.realpath(__file__), os.pardir), os.pardir)))
 
-import requests
+import json
 
+import requests
+import constants
 
 def downloadPage(url):
     return requests.get(url).json()
 
+def loadFromFileSystem(filepath):
+    with open(filepath, 'r') as file:
+        return json.loads(file.readline())
 
-def getStashBatch(url):
-    data = downloadPage(url)
-    return data['next_change_id'], data['stashes']
+def getStashBatch(url, returnIntegral=False, isLocal=False):
+    if isLocal:
+        data = loadFromFileSystem(url)
+    else:
+        data = downloadPage(url)
 
-
-def getIntegralStashBatch(url):
-    data = downloadPage(url)
-    return data['next_change_id'], data
-
+    if returnIntegral:
+        return data['next_change_id'], data
+    else:
+        return data['next_change_id'], data['stashes']
 
 def isHealthyStash(stash):
     return stash['stash'] is not None and stash[

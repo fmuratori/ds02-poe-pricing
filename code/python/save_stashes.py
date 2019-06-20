@@ -49,14 +49,14 @@ def saveStashes():
 
 
 def saveStash(nextChangeId):
-    # print('Loading stash: {}'.format(nextChangeIdValues[0]))
-    if nextChangeIdValues[1] is not None and int(
-            nextChangeId.split('-')[0]) > int(nextChangeIdValues[1].split('-')[0]):
+    if nextChangeIdValues[1] is not None and sum([
+            True if int(elem1) > int(elem2) else False for elem1, elem2 in zip(
+                nextChangeId.split('-'), nextChangeIdValues[1].split('-'))
+    ]) >= 3:
         return
 
-
-    newNextChangeId, stashes = utils.getIntegralStashBatch(constants.DEFAULT_URL +
-                                                nextChangeIdValues[0])
+    newNextChangeId, stashes = utils.getStashBatch(constants.DEFAULT_URL +
+                                                nextChangeIdValues[0], returnIntegral=True)
 
     print('SAVE ', constants.ORIGIN_DATA_FOLDER + str(nextChangeId) + '.json')
     with open(constants.ORIGIN_DATA_FOLDER + str(nextChangeId) + '.json',
