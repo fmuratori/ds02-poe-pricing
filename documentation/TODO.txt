@@ -1,6 +1,0 @@
-1_	ETL
-1_0	Extract PoE data from web api
-1_1	Parse data
-1_2	Transform and filter unneded items
-1_3	Load new dataset
-	
