@@ -1,5 +1,0 @@
-{
-    "python.formatting.provider": "yapf",
-    "python.linting.enabled": false,
-    "python.pythonPath": "/home/fabio/Desktop/poe_project_env/bin/python"
-}

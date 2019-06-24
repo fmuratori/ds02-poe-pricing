@@ -1,17 +1,14 @@
+import os
+
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 
 from bs4 import BeautifulSoup
-import os
 
-# VARIABLES
-URL_POE_NINJA = 'https://poe.ninja/stats'
-URL_STEAM_CHARTS = 'https://steamcharts.com/app/238960'
-URL_GIT_HYP = 'https://www.githyp.com/path-of-exile-100607/?tab=player-count'
+from .. import constants 
 
-BROWSER_DRIVE = '/home/fabio/Desktop/ds02-poe-pricing/data/temp/geckodriver'
+print(constants.URL_POE_NINJA)
 
-# SCRIPT
 def get_web_page_tree(url):
     options = Options()
     options.headless = True
