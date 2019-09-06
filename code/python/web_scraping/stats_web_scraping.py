@@ -8,8 +8,7 @@ from bs4 import BeautifulSoup
 
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
-
-# BROWSER_DRIVE = '/home/fabio/Desktop/ds02-poe-pricing/data/geckodriver'
+from pyvirtualdisplay import Display
 
 URL_POE_NINJA = 'https://poe.ninja/stats'
 URL_STEAM_CHARTS = 'https://steamcharts.com/app/238960'
@@ -20,6 +19,9 @@ SAVE_FILE = 'scraping_results.txt'
 PAGE_LOADING_TIMEOUT = 30
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', datefmt='%m/%d/%Y %H:%M:%S')
+
+display = Display(visible=0, size=(800, 600))
+display.start()
 
 options = Options()
 options.headless = True
@@ -73,14 +75,14 @@ def get_steamcharts_player_count():
         return 'NONE'
 
 def periodic_scraping():
-    last_scrape_time = datetime.now().time().minute - 1
+    last_scrape_time = datetime.now().time().hour - 1
 
     while True:
 
         now_time = datetime.now().time()
 
-        if last_scrape_time != now_time.minute:
-            last_scrape_time = now_time.minute
+        if last_scrape_time != now_time.hour:
+            last_scrape_time = now_time.hour
 
             res = [''] * 4
 
@@ -111,11 +113,9 @@ def periodic_scraping():
 
             print_to_file(res)
 
-        time.sleep(1)
+        time.sleep(600)
 
 if __name__ == '__main__':
-
-
     t1 = threading.Thread(target=periodic_scraping)
     t1.start()
     t1.join()
