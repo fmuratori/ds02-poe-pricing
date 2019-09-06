@@ -28,20 +28,19 @@ driver.set_page_load_timeout(PAGE_LOADING_TIMEOUT)
 
 def print_to_file(list):
     with open(SAVE_FILE, "a+") as file:
-        for item in list:
+        file.write(list[0].strftime("%m/%d/%Y %H:%M:%S") + ' ')
+        for item in list[1:]:
             file.write(item + ' ')
+
         file.write("\n")
 
 def _get_webpage_html(url):
     try:
         driver.get(url)
-        page_html = driver.page_source
-
-        return page_html
+        return driver.page_source
     except:
         logging.error('Page loading timed out')
         return None
-
 
 def get_poe_ninja_stats():
     page_html = _get_webpage_html(URL_POE_NINJA)
@@ -85,7 +84,7 @@ def periodic_scraping():
 
             res = [''] * 4
 
-            res[0] = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+            res[0] = datetime.now()
 
             start_time_tot = time.time()
             logging.info('Scraping web pages ...')
@@ -115,6 +114,8 @@ def periodic_scraping():
         time.sleep(1)
 
 if __name__ == '__main__':
+
+
     t1 = threading.Thread(target=periodic_scraping)
     t1.start()
     t1.join()
