@@ -16,30 +16,49 @@ URL_POE_NINJA = 'https://poe.ninja/stats'
 URL_STEAM_CHARTS = 'https://steamcharts.com/app/238960'
 URL_GIT_HYP = 'https://www.githyp.com/path-of-exile-100607/?tab=player-count'
 
-SAVE_FILE = 'scraping_results.txt'
+SAVE_FILE = 'scraping_results_e.txt'
 
 PAGE_LOADING_TIMEOUT = 60
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', datefmt='%m/%d/%Y %H:%M:%S')
 
-display = Display(visible=0, size=(800, 600))
-display.start()
+class WebBrowsingSession:
+    def __init__(self):
+        # raspbian display configuration
+        display = Display(visible=0, size=(800, 600))
+        display.start()
 
-# selenium driver options
-options = Options()
-options.headless = True
+        # selenium driver options
+        self.options = Options()
+        self.options.headless = True
+        self.active_inst = False
 
-driver = webdriver.Firefox(options=options)
-driver.set_page_load_timeout(PAGE_LOADING_TIMEOUT)
+    def instance_browser(self):
+        if self.active_inst:
+            raise ValueError('Web driver instance already active')
 
-def get_webpage_html(url):
-    try:
-        driver.get(url)
-        res = driver.page_source
-    except:
-        logging.error('Page loading timed out')
-        res = None
-    return res
+        self.driver = webdriver.Firefox(options=self.options)
+        self.driver.set_page_load_timeout(PAGE_LOADING_TIMEOUT)
+        self.active_inst = True
+
+    def release_browser(self):
+        if not self.active_inst:
+            raise ValueError('No web driver instance active')
+
+        self.driver.quit()
+        self.active_inst = False
+
+    def get_webpage_html(self, url):
+        if not self.active_inst:
+            raise ValueError('No web driver instance active')
+        try:
+            self.driver.get(url)
+            res = self.driver.page_source
+        except:
+            logging.error('Page loading timed out')
+            res = None
+        finally:
+            return res
 
 def print_to_file(list):
     with open(SAVE_FILE, "a+") as file:
@@ -49,8 +68,8 @@ def print_to_file(list):
 
         file.write("\n")
 
-def get_poe_ninja_stats():
-    page_html = get_webpage_html(URL_POE_NINJA)
+def get_poe_ninja_stats(wsession):
+    page_html = wsession.get_webpage_html(URL_POE_NINJA)
     if page_html is not None:
         soup = BeautifulSoup(page_html, "html.parser")
         div = soup.find("div", {"class": "stats-overview"})
@@ -61,16 +80,16 @@ def get_poe_ninja_stats():
     else:
         return 'NONE'
 
-def get_githyp_player_count():
-    page_html = get_webpage_html(URL_GIT_HYP)
+def get_githyp_player_count(wsession):
+    page_html = wsession.get_webpage_html(URL_GIT_HYP)
     if page_html is not None:
         soup = BeautifulSoup(page_html, "html.parser")
         return soup.find("div", {"id": "player_val"}).text.replace(',', '')
     else:
         return 'NONE'
 
-def get_steamcharts_player_count():
-    page_html = get_webpage_html(URL_STEAM_CHARTS)
+def get_steamcharts_player_count(wsession):
+    page_html = wsession.get_webpage_html(URL_STEAM_CHARTS)
     if page_html is not None:
         soup = BeautifulSoup(page_html, "html.parser")
         temp = soup.find("div", {"class": "app-stat"})
@@ -81,6 +100,8 @@ def get_steamcharts_player_count():
 
 def periodic_scraping():
     logging.info('Starting script with test mode {}'.format('ON' if TEST_MODE else 'OFF'))
+
+    wsession = WebBrowsingSession()
 
     while True:
         if not TEST_MODE:
@@ -102,20 +123,24 @@ def periodic_scraping():
 
         res[0] = datetime.now()
 
+        wsession.instance_browser()
+
         start_time = time.time()
-        res[1] = get_poe_ninja_stats()
+        res[1] = get_poe_ninja_stats(wsession)
         end_time = time.time()
         logging.info('Poe.ninja scraped in {} seconds'.format(round(end_time - start_time, 2)))
 
         start_time = end_time
-        res[2] = get_githyp_player_count()
+        res[2] = get_githyp_player_count(wsession)
         end_time = time.time()
         logging.info('GitHyp scraped in {} seconds'.format(round(end_time - start_time, 2)))
 
         start_time = end_time
-        res[3] = get_steamcharts_player_count()
+        res[3] = get_steamcharts_player_count(wsession)
         end_time = time.time()
         logging.info('Steam Charts scraped in {} seconds'.format(round(end_time - start_time, 2)))
+
+        wsession.release_browser()
 
         logging.info('Results: {}'.format(res))
 
