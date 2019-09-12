@@ -1,0 +1,19 @@
+Package created to gather preliminary data on path of exile, such as active
+players count or stash tab correlated values on a periodic time basis.
+
+Those data can be found on specific web pages and should not be considered
+trusted because not directly provided by GGG.
+
+Find geckodrive driver version based on firefox installation version
+https://firefox-source-docs.mozilla.org/testing/geckodriver/Support.html
+
+Download geckodrive
+https://github.com/mozilla/geckodriver/releases
+
+If the script is executed on raspbian (such as Raspberry 3 Model B):
+https://stackoverflow.com/questions/25027385/using-selenium-on-raspberry-pi-headless
+
+Move download geckodriver to /usr/bin/ (somewhere reachable by PATH
+environment variable)
+
+Run scritp

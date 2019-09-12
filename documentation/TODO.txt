@@ -1,6 +1,42 @@
-1_	ETL
-1_0	Extract PoE data from web api
-1_1	Parse data
-1_2	Transform and filter unneded items
-1_3	Load new dataset
-	
+1_ Define goal
+    Predict items price.
+    Analyze in-game currencies market.
+
+2_ Study problem
+    How does the game market works?
+
+    What kind of items do exists?
+
+    How an equipable item is defined?
+
+    What kind of currencies do exists?
+
+    Define KPIs
+        Ideally the number of sold items with 
+    Define predictors
+
+3_ Gather data (ETL)
+    Understand poe stash tabs API
+
+    Gather preliminary data
+        Poe stash tabs nextChangeId
+        Players per day
+
+    Define retriaval functionalities
+
+    Define filtering functionalities if needed
+
+    Define datalake structure and interfaces
+
+4_ Insight
+    Study preliminary data
+
+    Study gathered data
+
+    Plot and find correlations
+
+5_ Test models
+
+6_ Fine tune models
+
+7_ Deploy models
