@@ -59,6 +59,6 @@ if __name__ == '__main__':
     # assert if an unexisting database exists
 
     # assert if an existing database exsists
-    
+
     # assert if an user exists
 
