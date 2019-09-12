@@ -10,7 +10,6 @@ from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from pyvirtualdisplay import Display
 
-
 URL_POE_NINJA = 'https://poe.ninja/stats'
 URL_STEAM_CHARTS = 'https://steamcharts.com/app/238960'
 URL_GIT_HYP = 'https://www.githyp.com/path-of-exile-100607/?tab=player-count'
