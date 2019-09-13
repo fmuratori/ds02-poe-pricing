@@ -1,1 +1,1 @@
-# ds02-poe-pricing
+# poe-pricing
