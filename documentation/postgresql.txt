@@ -1,0 +1,8 @@
+1. "login" to a PostgreSQL account
+sudo -i -u fmuratori
+
+1.1 Create the database if not already present
+createdb poeprice_db
+
+2. Enter the psql command line to manage databases
+psql
