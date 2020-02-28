@@ -1,21 +1,3 @@
-'''
-Due to slow websites player count update (steam charts and git hyp) gathered
-data may be identical between two consecutive execution of the web scraping
-routine.
-
-Infact, i suspect that those two sources update their data once per hour and,
-due to some delay, a one hour periodic scraping may get data from the previous
-update of the web page.
-
-After web scraping a check on the gathered data is done and those missing values
-are simply filled by browsing manually those pages.
-
-Moreover, due to some strange problem or extremely slow internet connection, a
-built-in selenium timeout stop the web page download, raising an exception.
-
-The script programmed is not bullet proof thus post processing of data may be
-required.
-'''
 import time
 import threading
 from datetime import datetime, timedelta
@@ -32,7 +14,7 @@ URL_POE_NINJA = 'https://poe.ninja/stats'
 URL_STEAM_CHARTS = 'https://steamcharts.com/app/238960'
 URL_GIT_HYP = 'https://www.githyp.com/path-of-exile-100607/?tab=player-count'
 
-SAVE_FILE = 'scraping_results_e.txt'
+SAVE_FILE = '../../../data/next_change_id/scraping_result.txt'
 
 TEST_MODE = False
 PAGE_LOADING_TIMEOUT = 60
