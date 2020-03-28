@@ -1,57 +1,60 @@
+'''
+This script represent the extract component of a ETL pipeline. Instead of
+preventively save the next change ids from poe.ninja and consequently download
+the stashes (which seems to be an ineffective procedure), here the goal is to
+execute API calls to the stash tab api and immediately download the API
+contents.
+
+Some minor preprocessing will be applyed to limit the downloaded data size
+'''
+from threading import Thread
+from datetime import datetime
+import logging
+import time
 import json
 
-import requests
-from collections import namedtuple
+from smart_open import open
 
-BASE_POE_API_URL = 'https://www.pathofexile.com/api/public-stash-tabs?id='
+log = logging.getLogger(__name__)
 
-BLIGHT_NCI = '477096900-493708600-466167000-533102700-506542200'
+class APIProvider(Thread):
+    def __init__(self, u_lock, u_list, config):
+        Thread.__init__(self)
+        log.info('[E] - Initializing APIProvider thread ...')
 
-BLIGHT_RANDOM_NCI = '480000000-499000000-470000000-550000000-510000000'
+        self.u_lock = u_lock
+        self.u_list = u_list
+        self.config = config['EXTRACT']
+        self.sleep_time = int(self.config['SLEEP_TIME'])
 
-def json2obj(data):
-    '''
-    Convert a dict type object to a corresponding python custom object.
-    '''
-    return json.loads(data, object_hook=lambda y: namedtuple('X', y.keys())(*y.values()))
+    def run(self):
+        nci = self.config['STARTING_NCI']
+        while True:
 
+            a = time.time()
+            url = self.config['API_URL'] + nci
+            with open(url, 'rb') as file:
+                content = json.load(file)
+            b = time.time()
 
-#_______________________ DOWNLOAD STASHES _______________________
-def download_batch(next_change_id):
-    '''
-    Download single batch from poe stash tab API. A single batch contains multiple
-    stashes.
-    '''
-    r = requests.get(url=BASE_POE_API_URL+next_change_id)
-    return json2obj(r.text)
+            if not self.isLast(content, nci):
 
-def download_multiple_batches(next_change_id, n_batches=2):
-    '''
-    Download a fixed number of batches. This function is similar to download_batch.
-    '''
+                self.u_lock.acquire()
+                self.u_list.append((nci, content, datetime.now()))
+                u_list_size = len(self.u_list)
+                self.u_lock.release()
 
-    res = list()
-    for i in range(n_batches):
-        data = download_batch(next_change_id)
-        next_change_id = data.next_change_id
+                nci = content['next_change_id']
 
-        res.append(data)
-    return res
+                log.info('[E] - Stashes downloaded in {} seconds.\t U_LIST_SIZE: {}'.format(round(b-a, 2), u_list_size))
+            else:
+                # if not enougt changes are detected, the thread sleeps 1 minute
+                log.info('[E] - Reached head. Sleep {} seconds...'.format(self.config['SLEEP_TIME']))
+                time.sleep(self.sleep_time)
 
-def batch_generator(next_change_id, n_batches=None, max_next_change_id=None):
-    '''
-    Download poe stash tab API batches throght a generator. The generation can
-    be terminated both when at least n_batches of data have been provided or
-    when the generation surpass a threshold.
-    '''
-    res = list()
+    def isLast(self, content, curr_nci):
+        return len(content['stashes']) == 0 or content['next_change_id'] == curr_nci
 
-    while (n_batches is not None and i in range(n_batches)) or \
-        (max_next_change_id is not None and \
-            sum([int('-'.split(max_next_change_id)[i]) < \
-            int('-'.split(next_change_id)[i]) for i in range(5)]) < 3):
-
-        data = download_batch(next_change_id)
-        next_change_id = data.next_change_id
-
-        yield data
+class FileSystemProvider(Thread):
+    def __init__(self, u_lock, u_list, config):
+        raise NotImplementedError()

@@ -1,21 +1,34 @@
+from threading import Lock
+from datetime import datetime
+import configparser
 import logging
 
-import extract
-import transform
-import load
+from extract import FileSystemProvider, APIProvider
+from transform import SimpleTransformer, DBTransformer
+from load import SimpleLoader, DBLoader
 
+# logging utility
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', datefmt='%m/%d/%Y %H:%M:%S')
-# logging.basicConfig(level=logging.INFO)
-logging.getLogger(__name__)
 
-if __name__ == '__init__':
-    logging.info('Initializing process...')
-    logging.info('Downloading batches starting from nextChangeId={} ...'.format(initial_nci))
-    for batch in extract.batch_generator(next_change_id=)
-        logging.info('Downloading batch...')
-        start_time = time.time()
+# config variables
+import configparser
+config = configparser.ConfigParser()
+config.read('config.ini')
 
-        # extract.
+unpr_list_lock = Lock()
+unpr_list = []
 
-        end_time = time.time()
-        logging.debug('Batch downloaded in {} seconds'.format(end_time - start_time))
+pr_list_lock = Lock()
+pr_list = []
+
+if __name__== '__main__':
+    # start thread
+
+    extract_thread = APIProvider(unpr_list_lock, unpr_list, config)
+    extract_thread.start()
+
+    transform_thread = SimpleTransformer(unpr_list_lock, pr_list_lock, unpr_list, pr_list, config)
+    transform_thread.start()
+
+    load_thread = SimpleLoader(pr_list_lock, pr_list, config)
+    load_thread.start()
