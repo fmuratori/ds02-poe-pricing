@@ -48,20 +48,19 @@ if __name__ == '__main__':
         curr_nci = checkpoint_nci
         next_nci = lines[0][2]
     else:
-        curr_nci = None
+        curr_nci = lines[0][2]
+        next_nci = lines[1][2]
+        datetime = lines[0][0] + ' ' + lines[0][1]
+
+    print(curr_nci, next_nci)
 
     while len(lines) > 0:
-        if curr_nci is None:
-            curr_nci = lines[0][2]
-            next_nci = lines[1][2]
-            datetime = lines[0][0] + ' ' + lines[0][1]
-
         steps = 0
         start_time = time.time()
         while not reached_new_nci(curr_nci, next_nci):
             steps += 1
             # load json file from web
-            with open(var['API_URL'] + curr_nci, 'rb') as source:
+            with open(config['DEFAULT']['API_URL'] + curr_nci, 'rb') as source:
                 # save json file to local folder
                 with open(var['SAVE_PATH'] + curr_nci + '.json', 'w+') as dest:
                     stashes = json.load(source)
@@ -73,3 +72,6 @@ if __name__ == '__main__':
         # remove the first item in the list and iter the process until
         # the list is empty
         lines = lines[1:]
+        curr_nci = lines[0][2]
+        next_nci = lines[1][2]
+        datetime = lines[0][0] + ' ' + lines[0][1]
