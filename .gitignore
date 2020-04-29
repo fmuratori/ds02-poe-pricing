@@ -1,5 +1,8 @@
 __pycache__/
+*.ipynb_checkpoints
+
+build/
+dist/
+poe_price.egg-info/
 venv/
 data/temp/
-*.ipynb_checkpoints
-code/python/web_scraping/geckodriver.log

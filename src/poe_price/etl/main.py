@@ -1,12 +1,13 @@
-from threading import Lock, Condition
+from threading import Condition
 from datetime import datetime
 import configparser
 import logging
 import sys
+import os
 
-from extract import Provider
-from transform import Transformer
-from load import Loader
+from .extract import Provider
+from .transform import Transformer
+from .load import Loader
 
 
 # logging utility
@@ -15,7 +16,11 @@ log = logging.getLogger(__name__)
 
 # config variables
 config = configparser.ConfigParser()
-config.read('config.ini')
+__location__ = os.path.realpath(os.path.join(os.getcwd(),
+os.path.dirname(__file__)))                                 # get absolute path of the directory containing this files
+config.read(os.path.join(__location__, 'config.ini'))
+
+print(config.sections())
 
 # thread concurrent structures
 unpr_list_cond = Condition()

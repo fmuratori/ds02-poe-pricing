@@ -5,7 +5,7 @@ import time
 
 import json
 
-from database.psycopg2_utility import PoeTradeDBSession
+from ..database.psycopg2.session import PoePriceDBSession
 
 # from database import utility.PoePriceDBSession as utility
 
@@ -51,7 +51,7 @@ class Loader(Thread):
     def dbLoader(self, curr_nci, currency, mitems, mitems_sockets, mitems_prop, mitems_prop_voc, mitems_mods, \
             mitems_mods_voc):
         times = []
-        with PoeTradeDBSession() as session:
+        with PoePriceDBSession() as session:
             # load currency into the poe_trade database
             a = time.time()
             if currency is not None:

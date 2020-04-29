@@ -1,11 +1,9 @@
 import logging
 import time
 
-from stash_api import stash
-
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', datefmt='%m/%d/%Y %H:%M:%S')
 
-LEAGUE_NAME = 'Blight'
+LEAGUE_NAME = 'Delirium'
 STARTING_NEXTCHANGEID = '477090000-493700000-466160000-533100000-506540000'
 
 def build_nextchangeid(index, partial_nextchangeid):
@@ -19,7 +17,7 @@ def search_league_nextchangeid(index, partial_nextchangeid, step_size):
 
     while True:
         next_change_id, stashes = stash.get_stashes(build_nextchangeid(index, partial_nextchangeid))
-        print(next_change_id)
+
         for stash_data in stashes:
 
             if stash.is_healthy_stash(stash_data) and LEAGUE_NAME in stash_data['league']:
