@@ -1,0 +1,4 @@
+python3 -m venv venv
+venv/bin/pip install -U setuptools pip
+venv/bin/pip install .
+venv/bin/python -m poe_price.main
