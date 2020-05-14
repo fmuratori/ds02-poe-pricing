@@ -18,6 +18,13 @@ class PSQLSession:
         self.connection.commit()
         self.connection.close()
 
+    def query(self, text):
+        self.cursor.execute(text)
+        data = pd.DataFrame(self.cursor.fetchall(),
+                            columns = [desc[0]
+                                       for desc in self.cursor.description])
+        return data
+
     def check_record_existance(self, table, data):
         query_text = '''SELECT id FROM {} WHERE {};'''.format(table,
                      self._get_query_elements(data, type='select'))
@@ -62,7 +69,7 @@ class PSQLSession:
 CACHE_PROPERTY = {}
 CACHE_MODIFIER = {}
 
-class PoePriceDBSession(PSQLSession):
+class ETLSession(PSQLSession):
     def __init__(self):
         super().__init__('127.0.0.1', 'poe_price', 'fabio', 'password')
 
