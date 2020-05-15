@@ -6,3 +6,5 @@ dist/
 poe_price.egg-info/
 venv/
 data/temp/
+
+.vscode
