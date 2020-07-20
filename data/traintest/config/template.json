@@ -1,0 +1,18 @@
+{
+  "select": {
+    "items": {"poe_price.data.select.get_weapons": {}},
+    "currencies": {"poe_price.data.select.get_currency": {}}
+  },
+
+  "feature": {
+    "X": [
+      {"poe_price.feature.SubCategories": {}},
+      {"poe_price.feature.veiled": {"how": "count"}}
+    ],
+    "y": {"poe_price.feature.Price": {"market_head":20, "outlier_window":1}}
+  },
+
+  "model": {
+    "sklearn.linear_model.LinearRegression": {}
+  }
+}

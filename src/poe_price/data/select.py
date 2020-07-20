@@ -1,11 +1,9 @@
 from .session import PSQLSession
 
-# TODO: select only latest data
-# TODO: get PSQLSession params from ../config.ini
-
-def _get_by_item_category(category):
+def _get_by_item_category(category, conn_config):
     data = {}
-    with PSQLSession('localhost', 'poe_price', 'fabio', 'password') as session:
+    with PSQLSession(conn_config['host'], conn_config['database'], 
+                     conn_config['user'], conn_config['password']) as session:
         data['items'] = session.query('''
             SELECT * FROM trade_item
             WHERE category = '{}';
@@ -41,19 +39,20 @@ def _get_by_item_category(category):
             '''.format(category))
     return data
 
-def get_jewels():
-    return _get_by_item_category('jewels')
+def get_jewels(conn_config):
+    return _get_by_item_category('jewels', conn_config)
 
-def get_armours():
-    return _get_by_item_category('armours')
+def get_armours(conn_config):
+    return _get_by_item_category('armour', conn_config)
 
-def get_weapons():
-    return _get_by_item_category('weapons')
+def get_weapons(conn_config):
+    return _get_by_item_category('weapons', conn_config)
 
-def get_accessories():
-    return _get_by_item_category('accessories')
+def get_accessories(conn_config):
+    return _get_by_item_category('accessories', conn_config)
 
-def get_currency():
-    with PSQLSession('localhost', 'poe_price', 'fabio', 'password') as session:
+def get_currency(conn_config):
+    with PSQLSession(conn_config['host'], conn_config['database'], 
+                     conn_config['user'], conn_config['password']) as session:
         data = session.query('SELECT * FROM trade_currency')
     return data

@@ -5,7 +5,7 @@ import time
 
 import json
 
-from ..session import ETLSession
+from .session import ETLSession
 
 # from database import utility.ETLSession as utility
 
@@ -15,16 +15,21 @@ class Loader(Thread):
     '''
     Basic loader thread. Data is simply saved into a specific folder as a json file.
     '''
-    def __init__(self, p_cond, p_list, config):
+    def __init__(self, p_cond, p_list, etl_config, conn_config):
         Thread.__init__(self)
 
         self.p_cond = p_cond
         self.p_list = p_list
-        self.config = config['LOAD']
+        self.etl_config = etl_config['LOAD']
 
-        exec('self.policy = self.{}'.format(self.config['LOAD_POLICY']))
+        self.conn_host = conn_config['postgresql']['host']
+        self.conn_dbname = conn_config['postgresql']['database']
+        self.conn_user = conn_config['postgresql']['user']
+        self.conn_password = conn_config['postgresql']['password']
 
-        log.info('[L] - Initialized loader thread. Policy: {}'.format(self.config['LOAD_POLICY']))
+        exec('self.policy = self.{}'.format(self.etl_config['LOAD_POLICY']))
+
+        log.info('[L] - Initialized loader thread. Policy: {}'.format(self.etl_config['LOAD_POLICY']))
 
     def run(self):
         while True:
@@ -45,13 +50,14 @@ class Loader(Thread):
             return len(self.p_list)
 
     def fsLoader(self, curr_nci, content):
-        with open(self.config['SAVE_PATH'] + curr_nci + '.json', 'w+') as file:
+        with open(self.etl_config['SAVE_PATH'] + curr_nci + '.json', 'w+') as file:
             json.dump(content, file)
 
-    def dbLoader(self, curr_nci, currency, mitems, mitems_sockets, mitems_prop, mitems_prop_voc, mitems_mods, \
-            mitems_mods_voc):
+    def dbLoader(self, curr_nci, currency, mitems, mitems_sockets, mitems_prop, 
+            mitems_prop_voc, mitems_mods, mitems_mods_voc):
         times = []
-        with ETLSession() as session:
+        with ETLSession(self.conn_host, self.conn_dbname, 
+                        self.conn_user, self.conn_password) as session:
             # load currency into the poe_trade database
             a = time.time()
             if currency is not None:
@@ -105,8 +111,8 @@ class Loader(Thread):
             b = time.time()
             times.append(round(b-a, 2))
 
-            if self.config['DEBUG']:
-                log.info('[L] - Loading times (seconds): {}'.format(times))
+            if self.etl_config['DEBUG']:
+                log.debug('[L] - Loading times (seconds): {}'.format(times))
 
 if __name__ == '__main__':
     # db cleaning functiona

@@ -42,8 +42,8 @@ class Provider(Thread):
 
             if len(content['stashes']) == 0 or content['next_change_id'] == nci:
                 # if not enougt changes are detected, the thread sleeps 1 minute
-                log.info('[E] - Reached last available stash. Sleep {} seconds...'.format(self.config['SLEEP_TIME']))
-                time.sleep(self.config['SLEEP_TIME'])
+                log.info('[E] - Reached last available stash. Sleep {} seconds...'.format(int(self.config['SLEEP_TIME'])))
+                time.sleep(int(self.config['SLEEP_TIME']))
             else:
                 with self.u_cond:
                     self.u_list.append((nci, content, datetime.now()))
@@ -54,19 +54,19 @@ class Provider(Thread):
 
             nci = content['next_change_id']
 
-            time.sleep(self.config['SLEEP_TIME'])
+            time.sleep(int(self.config['SLEEP_TIME']))
 
     def fsProvider(self):
         files_name = sorted(os.listdir(self.config['SOURCE_PATH']))
         while True:
             a = time.time()
             file_name = files_name.pop(0)
-            with open(self.config['SOURCE_PATH'] + file_name, 'rb') as file:
+            with open(os.path.join(self.config['SOURCE_PATH'], file_name), 'rb') as file:
                 content = json.load(file)
             b = time.time()
 
             with self.u_cond:
-                self.u_list.append((file_name, content, datetime.strptime(content['datetime'], '%m/%d/%Y, %H:%M:%S')))
+                self.u_list.append((file_name, content, datetime.strptime(content['datetime'], '%m/%d/%Y')))
                 self.u_cond.notify_all()    # wake up other threads waiting for new data to process
                 u_list_size = len(self.u_list)
 
@@ -76,8 +76,5 @@ class Provider(Thread):
 
             if len(files_name) == 0:
                 # if the last file has been reached, the thread must be stopped
-                log.info('[E] - Reached last available stash. Terminating thread execution'.format(self.config['SLEEP_TIME']))
+                log.info('[E] - Reached last available stash. Terminating thread execution')
                 break
-
-
-            time.sleep(5)

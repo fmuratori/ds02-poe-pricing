@@ -17,13 +17,14 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', date
 log = logging.getLogger(__name__)
 
 @click.command()
-@click.option("--file", default='config.ini', help="Configuration file containing etl procedure policy settings")
-def initialize_etl(file):
+@click.argument("connect", default='connect.ini')
+@click.argument("etl", default='config.ini')
+def etl_from_config(connect, etl):
     # config variables
-    config = configparser.ConfigParser()
-    __location__ = os.path.realpath(os.path.join(os.getcwd(),
-    os.path.dirname(__file__))) # get absolute path of the directory containing this files
-    config.read(os.path.join(__location__, 'config.ini'))
+    connect_config = configparser.ConfigParser()
+    connect_config.read(connect)
+    etl_config = configparser.ConfigParser()
+    etl_config.read(etl)
 
     # thread concurrent structures
     unpr_list_cond = Condition()
@@ -32,15 +33,15 @@ def initialize_etl(file):
     pr_list_cond = Condition()
     pr_list = []
 
-    extract_thread = Provider(unpr_list_cond, unpr_list, config)
+    extract_thread = Provider(unpr_list_cond, unpr_list, etl_config)
     extract_thread.start()
 
     transform_thread = Transformer(unpr_list_cond, pr_list_cond,
-                                    unpr_list, pr_list, config)
+                                    unpr_list, pr_list, etl_config)
     transform_thread.start()
 
-    load_thread = Loader(pr_list_cond, pr_list, config)
+    load_thread = Loader(pr_list_cond, pr_list, etl_config, connect_config)
     load_thread.start()
 
 if __name__== '__main__':
-    initialize_etl()
+    etl_from_config()
