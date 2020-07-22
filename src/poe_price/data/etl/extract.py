@@ -34,11 +34,16 @@ class Provider(Thread):
     def apiProvider(self):
         nci = self.config['STARTING_NCI']
         while True:
-            a = time.time()
-            url = self.config['API_URL'] + nci
-            with open(url, 'rb') as file:
-                content = json.load(file)
-            b = time.time()
+            try:
+                a = time.time()
+                url = self.config['API_URL'] + nci
+                with open(url, 'rb') as file:
+                    content = json.load(file)
+                b = time.time()
+            except:
+                # web resources are unreachable
+                log.info('[E] Unreachable web resource: {}'.format(url))
+                continue
 
             if len(content['stashes']) == 0 or content['next_change_id'] == nci:
                 # if not enougt changes are detected, the thread sleeps 1 minute

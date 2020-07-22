@@ -5,7 +5,7 @@ import time
 
 import json
 
-from .session import ETLSession
+# from .session import ETLSession
 
 # from database import utility.ETLSession as utility
 
@@ -55,6 +55,7 @@ class Loader(Thread):
 
     def dbLoader(self, curr_nci, currency, mitems, mitems_sockets, mitems_prop, 
             mitems_prop_voc, mitems_mods, mitems_mods_voc):
+        from .session import ETLSession
         times = []
         with ETLSession(self.conn_host, self.conn_dbname, 
                         self.conn_user, self.conn_password) as session:
