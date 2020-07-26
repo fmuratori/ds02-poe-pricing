@@ -13,7 +13,7 @@ setup(
         "psycopg2-binary==2.8.5",
         "configparser==3.7.4",
         "smart-open==1.9.0",
-        "pandas==0.25.3",
+        "pandas==1.0.5",
         "scikit-learn==0.22.2",
         "click==7.1.2"
     ],
