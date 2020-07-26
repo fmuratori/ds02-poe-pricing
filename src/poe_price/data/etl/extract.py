@@ -24,58 +24,70 @@ class Provider(Thread):
 
         self.u_cond = u_cond
         self.u_list = u_list
+
+        # convert config data into object variables
+
         self.config = config['EXTRACT']
+        self.e_policy = config['EXTRACT']['EXTRACT_POLICY']
+        self.init_nci = config['EXTRACT']['STARTING_NCI']
+        self.source_url = config['EXTRACT']['API_URL']
+        self.sleep_time = int(config['EXTRACT']['SLEEP_TIME'])
+        self.source_path = config['EXTRACT']['SOURCE_PATH']
+        self.max_buffer_size = int(config['default']['BUFFER_SIZE'])
 
         # set the run method as one of the available policies
-        exec("self.run = self.{}".format(self.config['EXTRACT_POLICY']))
-
-        log.info('[E] - Initialized provider thread. Policy: {}'.format(self.config['EXTRACT_POLICY']))
+        exec("self.run = self.{}".format(self.e_policy))
+        log.info('[E] - Initialized provider thread. Policy: {}'.format(self.e_policy))
 
     def apiProvider(self):
-        nci = self.config['STARTING_NCI']
+        nci = self.init_nci
         while True:
-            try:
-                a = time.time()
-                url = self.config['API_URL'] + nci
-                with open(url, 'rb') as file:
-                    content = json.load(file)
-                b = time.time()
-            except:
-                # web resources are unreachable
-                log.info('[E] Unreachable web resource: {}'.format(url))
-                continue
+            # if the buffer is full, wait for data to be removed to add new one
+            with self.u_cond:
+                self.u_cond.wait_for(self._checkUnprocessedCond)
+
+            a = time.time()
+            url = self.source_url + nci
+            with open(url, 'rb') as file:
+                content = json.load(file)
+            b = time.time()
 
             if len(content['stashes']) == 0 or content['next_change_id'] == nci:
                 # if not enougt changes are detected, the thread sleeps 1 minute
-                log.info('[E] - Reached last available stash. Sleep {} seconds...'.format(int(self.config['SLEEP_TIME'])))
-                time.sleep(int(self.config['SLEEP_TIME']))
+                log.info('[E] - Reached last available stash. Sleep {} seconds...'.format(self.sleep_time))
+                time.sleep(self.sleep_time)
             else:
                 with self.u_cond:
-                    self.u_list.append((nci, content, datetime.now()))
-                    self.u_cond.notify_all()    # wake up other threads waiting for new data to process
-                    u_list_size = len(self.u_list)
+                    self.u_list.append((nci, content))
+                    self.u_cond.notify_all()
 
-                log.info('[E] - Data downloaded in {} seconds.\t U_LIST_SIZE: {}'.format(round(b-a, 2), u_list_size))
+                log.info('[E] - Data downloaded in {} seconds.'.format(round(b-a, 2)))
 
             nci = content['next_change_id']
 
-            time.sleep(int(self.config['SLEEP_TIME']))
+            time.sleep(self.sleep_time)
+
+    def _checkUnprocessedCond():
+        return len(self.u_list) < self.max_buffer_size
 
     def fsProvider(self):
-        files_name = sorted(os.listdir(self.config['SOURCE_PATH']))
+        files_name = sorted(os.listdir(self.source_path))
         while True:
+            with self.u_cond:
+                if len(self.u_list) > self.max_buffer_size:
+                    continue
+
             a = time.time()
             file_name = files_name.pop(0)
-            with open(os.path.join(self.config['SOURCE_PATH'], file_name), 'rb') as file:
+            with open(os.path.join(self.source_path, file_name), 'rb') as file:
                 content = json.load(file)
             b = time.time()
 
             with self.u_cond:
-                self.u_list.append((file_name, content, datetime.strptime(content['datetime'], '%m/%d/%Y')))
+                self.u_list.append((file_name, content))
                 self.u_cond.notify_all()    # wake up other threads waiting for new data to process
-                u_list_size = len(self.u_list)
 
-            log.info('[E] - Data extracted in {} seconds.\t U_LIST_SIZE: {}'.format(round(b-a, 2), u_list_size))
+            log.info('[E] - Data extracted in {} seconds.'.format(round(b-a, 2)))
 
             nci = content['next_change_id']
 
