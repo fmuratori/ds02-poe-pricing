@@ -5,6 +5,7 @@ sell_currency VARCHAR (50) NOT NULL,
 price_currency VARCHAR (50) NOT NULL,
 sell_quantity REAL NOT NULL,
 price_quantity REAL NOT NULL,
+is_stash_price BOOLEAN NOT NULL,
 date varchar(50) NOT NULL);
 
 CREATE TABLE trade_item (
@@ -26,6 +27,7 @@ num_suffixes SMALLINT,
 num_veiled_modifiers SMALLINT,
 price_currency VARCHAR(50) NOT NULL,
 price_quantity INTEGER NOT NULL,
+is_stash_price BOOLEAN NOT NULL,
 rarity VARCHAR(50) NOT NULL,
 requirement_dex SMALLINT,
 requirement_int SMALLINT,
