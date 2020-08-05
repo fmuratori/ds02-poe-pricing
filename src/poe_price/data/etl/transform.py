@@ -9,11 +9,13 @@ from . import transformer as tr
 
 log = logging.getLogger(__name__)
 
+
 class Transformer(Thread):
     '''
     Basic stashes handler procedure. This class simply save stashes data
     as json files with little to none processing to the source data.
     '''
+
     def __init__(self, u_cond, p_cond, u_list, p_list, config):
         Thread.__init__(self)
 
@@ -26,7 +28,8 @@ class Transformer(Thread):
 
         # set the run method as one of the available policies
         exec('self.policy = self.{}'.format(self.t_policy))
-        log.info('[T] - Initialized transformer thread. Policy: {}'.format(self.t_policy))
+        log.info(
+            '[T] - Initialized transformer thread. Policy: {}'.format(self.t_policy))
 
     def run(self):
         while True:
@@ -51,7 +54,8 @@ class Transformer(Thread):
                 self.p_list.append(elem)
                 self.p_cond.notify_all()
 
-            log.info('[T] - Stashes processed in {} seconds.'.format(round(b-a, 2)))
+            log.info(
+                '[T] - Stashes processed in {} seconds.'.format(round(b-a, 2)))
 
     def _checkUnprocessedCond(self):
         return len(self.u_list) > 0
@@ -59,7 +63,7 @@ class Transformer(Thread):
     def _checkProcessedCond(self):
         return len(self.p_list) < self.max_buffer_size
 
-    def simpleTransformer(self, curr_nci, content, dtime):
+    def simpleTransformer(self, curr_nci, content):
         content = tr.filter_json(content)
         return curr_nci, content
 
@@ -72,4 +76,4 @@ class Transformer(Thread):
             items)
 
         return curr_nci, currency, mitems, mitems_sockets, mitems_prop, mitems_prop_voc, mitems_mods, \
-                mitems_mods_voc
+            mitems_mods_voc
