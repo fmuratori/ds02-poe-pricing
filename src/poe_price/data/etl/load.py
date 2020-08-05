@@ -5,19 +5,14 @@ import time
 
 import json
 
-
-from .session import ETLSession
-
-# from .session import ETLSession
-
-# from database import utility.ETLSession as utility
-
 log = logging.getLogger(__name__)
+
 
 class Loader(Thread):
     '''
     Basic loader thread. Data is simply saved into a specific folder as a json file.
     '''
+
     def __init__(self, p_cond, p_list, etl_config, conn_config):
         Thread.__init__(self)
 
@@ -35,9 +30,11 @@ class Loader(Thread):
 
         exec('self.policy = self.{}'.format(self.l_policy))
         if self.l_policy == 'dbLoader':
-            self.db_session = ETLSession(self.conn_host, self.conn_dbname, 
-                self.conn_user, self.conn_password)
-        log.info('[L] - Initialized loader thread. Policy: {}'.format(self.l_policy))
+            from .session import ETLSession
+            self.db_session = ETLSession(self.conn_host, self.conn_dbname,
+                                         self.conn_user, self.conn_password)
+        log.info(
+            '[L] - Initialized loader thread. Policy: {}'.format(self.l_policy))
 
     def run(self):
         while True:
@@ -60,9 +57,9 @@ class Loader(Thread):
         with open(self.save_path + curr_nci + '.json', 'w+') as file:
             json.dump(content, file)
 
-    def dbLoader(self, curr_nci, currency, mitems, mitems_sockets, mitems_prop, 
-            mitems_prop_voc, mitems_mods, mitems_mods_voc):
-        
+    def dbLoader(self, curr_nci, currency, mitems, mitems_sockets, mitems_prop,
+                 mitems_prop_voc, mitems_mods, mitems_mods_voc):
+
         times = []
         with self.db_session as session:
             # load currency into the poe_trade database
@@ -120,6 +117,7 @@ class Loader(Thread):
 
             if self.debug:
                 log.debug('[L] - Loading times (seconds): {}'.format(times))
+
 
 if __name__ == '__main__':
     # db cleaning functiona
