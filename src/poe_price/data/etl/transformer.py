@@ -136,8 +136,8 @@ def filter_item_price(items):
 
     # UNTESTED
     # convert rarely used currency identifier to preferable identifier
-    target_condition = items[items.price_currency.isin(
-        ['cartographer', 'fuse', 'gemcutter', 'exa'])]
+    target_condition = items.price_currency.isin(
+        ['cartographer', 'fuse', 'gemcutter', 'exa'])
     items[target_condition].price_currency = items[target_condition].price_currency.apply(
         lambda y: CURRENCY_DICT[INV_CURRENCY_DICT[y]][0])
 
@@ -212,10 +212,9 @@ def filter_json(content):
 
 
 def extract_items(content):
-    dtime = datetime.strptime(content['datetime'], '%m/%d/%Y')
 
     items = get_items(content)
-    items['date'] = dtime.strftime("%m/%d/%Y")
+    items['date'] = content['datetime']
 
     items = filter_item_league(items, LEAGUES)
     items = extract_item_category(items)
@@ -330,6 +329,6 @@ def extract_mod_items(items):
                              if v not in MITEMS_COLUMNS],
                     inplace=True, errors='ignore')
 
-    return mitems, mitems_sockets, mitems_prop, mitems_prop_voc, mitems_mods, mitems_mods_voc
+        return mitems, mitems_sockets, mitems_prop, mitems_prop_voc, mitems_mods, mitems_mods_voc
     else:
         return None, None, None, None, None, None
