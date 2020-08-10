@@ -33,7 +33,7 @@ requirement_dex SMALLINT DEFAULT 0,
 requirement_int SMALLINT DEFAULT 0,
 requirement_str SMALLINT DEFAULT 0,
 requirement_level SMALLINT DEFAULT 0,
-sub_category VARCHAR(50) DEFAULT "",
+sub_category VARCHAR(50) DEFAULT '',
 synthesised BOOLEAN DEFAULT FALSE,
 talisman_tier SMALLINT DEFAULT 0,
 date varchar(50) NOT NULL);
