@@ -13,8 +13,10 @@ from .load import Loader
 
 
 # logging utility
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', datefmt='%m/%d/%Y %H:%M:%S')
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(message)s', datefmt='%m/%d/%Y %H:%M:%S')
 log = logging.getLogger(__name__)
+
 
 @click.command()
 @click.argument("connect", default='connect.ini')
@@ -37,11 +39,12 @@ def etl_from_config(connect, etl):
     extract_thread.start()
 
     transform_thread = Transformer(unpr_list_cond, pr_list_cond,
-                                    unpr_list, pr_list, etl_config)
+                                   unpr_list, pr_list, etl_config)
     transform_thread.start()
 
     load_thread = Loader(pr_list_cond, pr_list, etl_config, connect_config)
     load_thread.start()
 
-if __name__== '__main__':
+
+if __name__ == '__main__':
     etl_from_config()

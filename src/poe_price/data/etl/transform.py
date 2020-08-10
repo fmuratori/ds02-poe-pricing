@@ -24,6 +24,7 @@ class Transformer(Thread):
         self.u_list = u_list
         self.p_list = p_list
         self.t_policy = config['TRANSFORM']['TRANSFORM_POLICY']
+
         self.max_buffer_size = int(config['default']['BUFFER_SIZE'])
 
         # set the run method as one of the available policies

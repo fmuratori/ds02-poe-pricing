@@ -21,8 +21,7 @@ class Loader(Thread):
 
         self.l_policy = etl_config['LOAD']['LOAD_POLICY']
         self.save_path = etl_config['LOAD']['SAVE_PATH']
-        self.debug = etl_config['LOAD']['DEBUG']
-
+        self.debug = bool(etl_config['LOAD']['DEBUG'])
         self.conn_host = conn_config['postgresql']['host']
         self.conn_dbname = conn_config['postgresql']['database']
         self.conn_user = conn_config['postgresql']['user']
@@ -32,7 +31,8 @@ class Loader(Thread):
         if self.l_policy == 'dbLoader':
             from .session import ETLSession
             self.db_session = ETLSession(self.conn_host, self.conn_dbname,
-                                         self.conn_user, self.conn_password)
+                                         self.conn_user, self.conn_password,
+                                         self.debug)
         log.info(
             '[L] - Initialized loader thread. Policy: {}'.format(self.l_policy))
 
@@ -65,58 +65,51 @@ class Loader(Thread):
             # load currency into the poe_trade database
             a = time.time()
             if currency is not None:
-                for v in currency.T.to_dict().values():
-                    session.insert_currency(v)
-            b = time.time()
-            times.append(round(b-a, 2))
+                session.insert_currency(currency.T.to_dict().values())
+            times.append(round(time.time() - a, 2))
 
             a = time.time()
             if mitems_prop_voc is not None:
                 mitems_prop_voc = mitems_prop_voc.T.to_dict()
                 for k in mitems_prop_voc.keys():
                     session.insert_property_type(k, mitems_prop_voc[k])
-            b = time.time()
-            times.append(round(b-a, 2))
+            times.append(round(time.time() - a, 2))
 
             a = time.time()
             if mitems_mods_voc is not None:
                 mitems_mods_voc = mitems_mods_voc.T.to_dict()
                 for k in mitems_mods_voc.keys():
                     session.insert_modifier_type(k, mitems_mods_voc[k])
-            b = time.time()
-            times.append(round(b-a, 2))
+            times.append(round(time.time() - a, 2))
 
             a = time.time()
             if mitems is not None:
-                mitems = mitems.T.to_dict()
-                for k in mitems.keys():
-                    session.insert_item(k, mitems[k])
-            b = time.time()
-            times.append(round(b-a, 2))
+                session.insert_item(mitems.T.to_dict())
+            times.append(round(time.time() - a, 2))
 
             a = time.time()
             if mitems_mods is not None:
-                for v in mitems_mods.T.to_dict().values():
-                    session.insert_item_modifier(v)
-            b = time.time()
-            times.append(round(b-a, 2))
+                session.insert_item_modifier(
+                    mitems_mods.T.to_dict().values())
+            times.append(round(time.time() - a, 2))
 
             a = time.time()
             if mitems_prop is not None:
-                for v in mitems_prop.T.to_dict().values():
-                    session.insert_item_property(v)
-            b = time.time()
-            times.append(round(b-a, 2))
+                session.insert_item_property(
+                    mitems_prop.T.to_dict().values())
+            times.append(round(time.time() - a, 2))
 
             a = time.time()
             if mitems_sockets is not None:
-                for v in mitems_sockets.T.to_dict().values():
-                    session.insert_item_socket(v)
-            b = time.time()
-            times.append(round(b-a, 2))
+                session.insert_item_socket(
+                    mitems_sockets.T.to_dict().values())
+            times.append(round(time.time() - a, 2))
 
             if self.debug:
-                log.debug('[L] - Loading times (seconds): {}'.format(times))
+                log.info('[L] - Loaded file content: {}'.format(curr_nci))
+                log.info('[L] - Loading times (seconds): {}'.format(times))
+
+            session.clean_cache()
 
 
 if __name__ == '__main__':

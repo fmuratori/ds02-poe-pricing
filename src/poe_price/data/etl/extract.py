@@ -7,12 +7,13 @@ contents.
 
 Some minor preprocessing will be applyed to limit the downloaded data size
 '''
-from threading import Thread
-from datetime import datetime
-import logging
+import re
+import os
 import time
 import json
-import os
+import logging
+from threading import Thread
+from datetime import datetime
 
 from smart_open import open
 
@@ -35,6 +36,10 @@ class Provider(Thread):
         self.sleep_time = int(config['EXTRACT']['SLEEP_TIME'])
         self.source_path = config['EXTRACT']['SOURCE_PATH']
         self.max_buffer_size = int(config['default']['BUFFER_SIZE'])
+
+        t = config['EXTRACT']['STARTING_FILE']
+        self.starting_file = t if re.match(
+            '(\d*-){4}\d*.json', t) is not None else None
 
         # set the run method as one of the available policies
         exec("self.run = self.{}".format(self.e_policy))
@@ -81,6 +86,11 @@ class Provider(Thread):
 
     def fsProvider(self):
         files_name = sorted(os.listdir(self.source_path))
+
+        # jump to specific file
+        if self.starting_file is not None:
+            files_name = files_name[files_name.index(self.starting_file) + 1:]
+
         while True:
             with self.u_cond:
                 if len(self.u_list) > self.max_buffer_size:

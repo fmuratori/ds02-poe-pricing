@@ -99,7 +99,7 @@ def extract_string_price(string):
                 sellingStackSize = 1
 
             return currency, quantity, sellingStackSize
-    except TypeError:
+    except (TypeError, IndexError) as e:
         # no match found
         pass
     return (None, None, None)
@@ -138,9 +138,8 @@ def filter_item_price(items):
     # convert rarely used currency identifier to preferable identifier
     target_condition = items.price_currency.isin(
         ['cartographer', 'fuse', 'gemcutter', 'exa'])
-    items[target_condition].price_currency = items[target_condition].price_currency.apply(
+    items.loc[target_condition, 'price_currency'] = items[target_condition].price_currency.apply(
         lambda y: CURRENCY_DICT[INV_CURRENCY_DICT[y]][0])
-
     return items
 
 
@@ -212,7 +211,6 @@ def filter_json(content):
 
 
 def extract_items(content):
-
     items = get_items(content)
     items['date'] = content['datetime']
 
@@ -234,7 +232,7 @@ def extract_currencies(items):
     currency.drop(columns=[v for v in currency.columns
                            if v not in CURRENCY_COLUMNS],
                   inplace=True, errors='ignore')
-    return currency
+    return currency if len(currency) > 0 else None
 
 
 def extract_mod_items(items):

@@ -6,6 +6,7 @@ from .session import PSQLSession
 
 # TODO: get PSQLSession params from ../config.ini
 
+
 @click.command()
 @click.argument('connect', default='connect.ini')
 @click.option('--structure', default='poe_price.sql', help='Databse structure sql file. Necessary if the option --create is selected')
@@ -40,9 +41,12 @@ def parse_options(connect, structure, clean, stats, drop, create):
                     AND pid <> pg_backend_pid();''')
 
                 try:
-                    session.cursor.execute('''DELETE FROM trade_item_socket;''')
-                    session.cursor.execute('''DELETE FROM trade_item_property;''')
-                    session.cursor.execute('''DELETE FROM trade_item_modifier;''')
+                    session.cursor.execute(
+                        '''DELETE FROM trade_item_socket;''')
+                    session.cursor.execute(
+                        '''DELETE FROM trade_item_property;''')
+                    session.cursor.execute(
+                        '''DELETE FROM trade_item_modifier;''')
                     session.cursor.execute('''DELETE FROM trade_currency;''')
                     session.cursor.execute('''DELETE FROM modifier_type;''')
                     session.cursor.execute('''DELETE FROM property_type;''')
@@ -52,7 +56,8 @@ def parse_options(connect, structure, clean, stats, drop, create):
 
             if stats:
                 for tname in tnames:
-                    session.cursor.execute('''SELECT COUNT(*) FROM {};'''.format(tname))
+                    session.cursor.execute(
+                        '''SELECT COUNT(*) FROM {};'''.format(tname))
                     result = session.cursor.fetchall()[0][0]
                     print('TABLE {}: {} elements'.format(tname, result))
 
@@ -70,8 +75,9 @@ def parse_options(connect, structure, clean, stats, drop, create):
             with open(structure, 'r') as f:
                 t = f.readlines()
             t = ''.join(t).replace('\n', '')
-            
+
             session.cursor.execute('''{}'''.format(t))
+
 
 if __name__ == '__main__':
     parse_options()
