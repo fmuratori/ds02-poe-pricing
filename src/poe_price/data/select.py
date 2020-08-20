@@ -1,10 +1,11 @@
 
+import os
+import pandas as pd
+
 
 def _get_from_csv(folder, categories, currency_type):
-    import pandas as pd
-
     trade_currency = pd.read_csv(os.path.join(folder, 'trade_currency.csv'))
-    trade_currency = trade_currency[(trade_currency.selling_currency.isin(currency_type)) &
+    trade_currency = trade_currency[(trade_currency.sell_currency.isin(currency_type)) &
                                     (trade_currency.price_currency.isin(currency_type))]
 
     trade_item = pd.read_csv(os.path.join(folder, 'trade_item.csv'))
@@ -37,8 +38,7 @@ def _get_from_csv(folder, categories, currency_type):
             'trade_item_modifier': trade_item_modifier,
             'trade_item_property': trade_item_property,
             'modifier_type': modifier_type,
-            'property_type': property_type},
-    trade_currency
+            'property_type': property_type}, trade_currency
 
 
 def _get_by_item_category(categories, conn_config, currency_types):
