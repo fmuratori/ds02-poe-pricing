@@ -400,7 +400,7 @@ class Price(BaseException):
             currencies.price_quantity
 
         for v1 in self.currency_set:
-            v2 == 'chaos'
+            v2 = 'chaos'
             if v1 == v2:
                 value = 1
             else:  # we are interested only in converting over currencies to the "chaos" type
