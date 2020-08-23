@@ -383,15 +383,13 @@ class Price(BaseException):
 
     def transform(self, X, y=None):
         data, currencies = X
-        feat = np.zeros((len(data['trade_item']), 1))
-        for i, (k, v) in enumerate(data['trade_item'].iterrows()):
-            if v.price_currency != 'chaos':
-                value = self.c_rates.loc['chaos',
-                                         v.price_currency] * v.price_quantity
-            else:
-                value = v.price_quantity
-            feat[i, 0] = value if value <= self.max_price_value else self.max_price_value
-        return feat
+
+        feat = data['trade_item'].price_quantity.copy()
+        temp = data['trade_item'][data['trade_item'].price_currency != 'chaos']
+        feat.loc[temp.index] = feat[temp.index] * \
+            temp.price_currency.apply(lambda y: self.c_rates.loc['chaos', y])
+        feat[i] = value if value <= self.max_price_value else self.max_price_value
+        return feat.values
 
     def _extract_exchange_rates(self, currencies):
         self.c_rates = pd.DataFrame(
@@ -400,16 +398,20 @@ class Price(BaseException):
             currencies.price_quantity
 
         for v1 in self.currency_set:
-            v2 = 'chaos'
-            if v1 == v2:
-                value = 1
-            else:  # we are interested only in converting over currencies to the "chaos" type
-                temp = currencies[(currencies.sell_currency == v1) &
-                                  (currencies.price_currency == v2)].copy()
-                temp.sort_values('rate', ascending=False, inplace=True)
-                temp['n_rate'] = temp.rate.apply(lambda y: (
-                    y - temp.rate.mean()) / temp.rate.std())
-                temp = temp[(temp.n_rate > -self.outlier_window) &
-                            (temp.n_rate < self.outlier_window)].rate
-                value = round(np.mean(temp.head(self.market_head)), 3)
-            self.c_rates.loc[v1, v2] = value
+            for v2 in self.currency_set:
+                if v1 == v2:
+                    value = 1
+                else:
+                    temp = currencies[(currencies.sell_currency == v1) &
+                                      (currencies.price_currency == v2)].copy()
+                    temp.sort_values('rate', ascending=False, inplace=True)
+                    mean_r = temp.rate.mean()
+                    std_r = temp.rate.std()
+
+                    temp['n_rate'] = (temp.rate.values - mean_r) / std_r
+
+                    temp = temp[(temp.n_rate > -self.outlier_window) &
+                                (temp.n_rate < self.outlier_window)].rate
+
+                    value = round(np.mean(temp.head(self.market_head)), 3)
+                self.c_rates.loc[v1, v2] = value
