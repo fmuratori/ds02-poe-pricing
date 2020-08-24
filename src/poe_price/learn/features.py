@@ -388,8 +388,9 @@ class Price(BaseException):
         temp = data['trade_item'][data['trade_item'].price_currency != 'chaos']
         feat.loc[temp.index] = feat[temp.index] * \
             temp.price_currency.apply(lambda y: self.c_rates.loc['chaos', y])
-        feat[i] = value if value <= self.max_price_value else self.max_price_value
-        return feat.values
+        feat = feat.values
+        feat[feat > self.max_price_value] = self.max_price_value
+        return feat.reshape(-1, 1)
 
     def _extract_exchange_rates(self, currencies):
         self.c_rates = pd.DataFrame(
