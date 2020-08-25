@@ -373,19 +373,16 @@ class Price(BaseException):
         self.max_price_value = max_price_value
 
     def fit(self, X, y=None):
-        data, currencies = X
-        self.currency_set = set(set(currencies.sell_currency.values) &
-                                set(currencies.price_currency.values))
+        self.currency_set = set(set(X['trade_currency'].sell_currency.values) &
+                                set(X['trade_currency'].price_currency.values))
 
-        self._extract_exchange_rates(currencies)
+        self._extract_exchange_rates(X['trade_currency'])
 
         return self
 
     def transform(self, X, y=None):
-        data, currencies = X
-
-        feat = data['trade_item'].price_quantity.copy()
-        temp = data['trade_item'][data['trade_item'].price_currency != 'chaos']
+        feat = X['trade_item'].price_quantity.copy()
+        temp = X['trade_item'][X['trade_item'].price_currency != 'chaos']
         feat.loc[temp.index] = feat[temp.index] * \
             temp.price_currency.apply(lambda y: self.c_rates.loc['chaos', y])
         feat = feat.values

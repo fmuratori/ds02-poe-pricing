@@ -38,7 +38,8 @@ def _get_from_csv(folder, categories, currency_type):
             'trade_item_modifier': trade_item_modifier,
             'trade_item_property': trade_item_property,
             'modifier_type': modifier_type,
-            'property_type': property_type}, trade_currency
+            'property_type': property_type,
+            'trade_currency': trade_currency}
 
 
 def _get_by_item_category(categories, conn_config, currency_types):
@@ -89,6 +90,11 @@ def _get_by_item_category(categories, conn_config, currency_types):
             AND pt.id = tip.property_id
             AND ti.id IN ({}) ORDER BY pt.id;
             '''.format(', '.join([str(v) for v in data['trade_item'].id.values])))
+
+        data = session.query(
+            '''SELECT * FROM trade_currency 
+            WHERE price_currency IN {} and sell_currency 
+            IN {};'''.format('\', \''.join(currency_types)))
     return data
 
 
